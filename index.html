@@ -115,7 +115,7 @@ input[type=text]{width:100%;padding:12px;border-radius:12px;background:var(--bg)
  <div id="cont"></div>
  <h2>Stories</h2><div class="grid" id="stories"></div>
  <p style="color:var(--mut);font-size:13px;margin-top:26px"><a href="#" id="lgAbout">About</a> · <a href="#" id="lgTerms">Terms</a> · <a href="#" id="lgPriv">Privacy</a></p>
- <p style="color:var(--mut);font-size:12px;margin-top:26px" id="ver">v1.3 · 600 dpi pages + stickers</p>
+ <p style="color:var(--mut);font-size:12px;margin-top:26px" id="ver">v1.4 · clip timing fix</p>
 </div></section>
 
 <section id="story" class="screen hid">
@@ -875,10 +875,10 @@ function record(cvs,fn,dur,prog,audio,acx,opt){return new Promise((res,rej)=>{co
  rec.onerror=()=>{if(!done){done=true;try{rec.stop()}catch(e){finish(true)}}};
  rel=keepAwake();
  rec.start(250);
- let last=performance.now(),paused=document.hidden;
+ let last=performance.now(),paused=document.hidden,a0=null;
  function vis(){if(document.hidden){paused=true;if(!ios){try{rec.pause()}catch(e){}if(acx)try{acx.suspend()}catch(e){}}}else{paused=false;last=performance.now();if(!ios){try{rec.resume()}catch(e){}}if(acx)try{acx.resume()}catch(e){}}}
  document.addEventListener("visibilitychange",vis);
- (function f(){if(done)return;if(tt>=dur){done=true;try{rec.stop()}catch(e){finish(false)}return}const now=performance.now();if(now-last<30){requestAnimationFrame(f);return}if(!paused){tt+=Math.min(.25,(now-last)/1000);try{fn(tt)}catch(e){console.error(e)}try{if(prog)prog(tt)}catch(e){}if(pump){const want=Math.floor(tt*30);let due=Math.min(want-sent,12);for(;due>0;due--){try{vt.requestFrame()}catch(e){}sent++}sent=Math.max(sent,want)}}last=now;requestAnimationFrame(f)})()})}
+ (function f(){if(done)return;if(tt>=dur){done=true;try{rec.stop()}catch(e){finish(false)}return}const now=performance.now();if(now-last<30){requestAnimationFrame(f);return}if(!paused){const dt=Math.min(.25,(now-last)/1000);if(acx&&acx.state==="running"){if(a0==null)a0=acx.currentTime-tt;const at=acx.currentTime-a0;tt=Math.max(tt,Math.min(at,tt+.25))}else tt+=dt;try{fn(tt)}catch(e){console.error(e)}try{if(prog)prog(tt)}catch(e){}if(pump){const want=Math.floor(tt*30);let due=Math.min(want-sent,12);for(;due>0;due--){try{vt.requestFrame()}catch(e){}sent++}sent=Math.max(sent,want)}}last=now;requestAnimationFrame(f)})()})}
 function sparkPts(L,k,n){const gd=L.gg.getContext("2d").getImageData(0,0,L.w,L.h).data,cd=L.cc.getContext("2d").getImageData(0,0,L.w,L.h).data,pts=[];
  for(let i=0;i<30000&&pts.length<n*.7;i++){const x=(Math.random()*L.w)|0,y=(Math.random()*L.h)|0;if(gd[(y*L.w+x)*4+3]>150)pts.push({x:x*k,y:y*k,r:rr(3,8)*k,p:Math.random(),s:rr(.6,1.5)})}
  for(let i=0;i<30000&&pts.length<n;i++){const x=(Math.random()*L.w)|0,y=(Math.random()*L.h)|0,j=(y*L.w+x)*4;if(!(cd[j]>246&&cd[j+1]>246&&cd[j+2]>246)&&Math.max(cd[j],cd[j+1],cd[j+2])>150&&Math.random()<.4)pts.push({x:x*k,y:y*k,r:rr(2,6)*k,p:Math.random(),s:rr(.5,1.2)})}return pts}
